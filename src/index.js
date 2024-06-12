@@ -31,6 +31,25 @@ async function getConnection() {
 
 // ENDPOINTS
 
+const authorize = (req, res, next) => {
+    const tokenString = req.headers.authorization;
+    console.log(tokenString)
+    if(!tokenString) {
+        res.status(400).json({successs: false, message: "Debes iniciar sesión"})
+    } else {
+        try {
+            // const token = tokenString.split(" ")[1];
+            const token = tokenString;
+            const verifiedToken = jwt.verify(token, process.env.SECRET);
+             req.userInfo = verifiedToken;
+        } catch (error) {
+            res.status(400).json({success: false, message: error})
+        }
+    }
+    
+    next();
+};
+
 // get (toda la tabla)
 app.get("/pets", async (req, res) => {
     try {
@@ -71,7 +90,7 @@ app.get("/pets/:id", async (req, res) => {
 });
 
 // post (añadir)
-app.post("/addPet", async (req, res) => {
+app.post("/addPet", authorize, async (req, res) => {
     const conn = await getConnection();
     const { name, species, sex, descr } = req.body;
    
@@ -90,6 +109,26 @@ app.post("/addPet", async (req, res) => {
 
     await conn.end();
 });
+
+// app.post("/addPet", async (req, res) => {
+//     const conn = await getConnection();
+//     const { name, species, sex, descr } = req.body;
+   
+//     const insert = "INSERT into pets (name, species, sex, descr) values(?,?,?,?)";
+//     const [newPet] = await conn.query(insert, [
+//         name,
+//         species,
+//         sex,
+//         descr,
+//     ]);
+
+//     res.status(200).json({
+//         success: true,
+//         id: newPet.insertId
+//     });
+
+//     await conn.end();
+// });
 
 // put (modificar)
 app.put("/pets/:id", async (req, res) => {
@@ -188,23 +227,6 @@ app.post("/login", async (req, res) => {
 })
 
 // ruta protegida
-const authorize = (req, res, next) => {
-    const tokenString = req.headers.authorization;
-
-    if(!tokenString) {
-        res.status(400).json({successs: false, message: "Debes iniciar sesión"})
-    } else {
-        try {
-            const token = tokenString.split(" ")[1];
-            const verifiedToken = jwt.verify(token, process.env.SECRET);
-             req.userInfo = verifiedToken;
-        } catch (error) {
-            res.status(400).json({success: false, message: error})
-        }
-    }
-    
-    next();
-};
 
 app.get("/myPets", authorize, async (req, res) => {
     try {

@@ -11,6 +11,15 @@ function App() {
     email: "", 
     address: "", 
     password: ""})
+  const [newPetData, setNewPetData] = useState({ 
+    name: "", 
+    species: "", 
+    sex: "", 
+    descr: ""})
+  
+  const [token, setToken] = useState("");
+
+  const [isLogged, setIsLogged] = useState(false);
 
   useEffect(() => {
     fetch(`http://localhost:5001/pets`)
@@ -28,8 +37,10 @@ function App() {
     
     if (formId === "login-form") {
       setLoginData({ ...loginData, [id]: value });
+    } else if (formId === "signup-form") {
+      setSignupData({...signupData, [id]: value});
     } else {
-      setSignupData({...signupData, [id]: value})
+      setNewPetData({...newPetData, [id]: value})
     }
     
   }
@@ -46,7 +57,10 @@ function App() {
     })
     .then((response) => response.json())
     .then(response => {
-      console.log(response)
+      if (response.success) {
+        setIsLogged(true)
+        setToken(response.token)
+      }
     })
 
   };
@@ -58,14 +72,31 @@ function App() {
       method: "POST",
       body: JSON.stringify(signupData),
       headers: {
-        'content-type': 'application/json'
+        'content-type': 'application/json',
+        
       }
     })
     .then((response) => response.json())
     .then(response => {
       console.log(response)
     })
+  };
 
+  const handleAddPet = (ev) => {
+    ev.preventDefault()
+
+    fetch(`http://localhost:5001/addPet`, {
+      method: "POST",
+      body: JSON.stringify(newPetData),
+      headers: {
+        'content-type': 'application/json',
+        authorization: token
+      }
+    })
+    .then((response) => response.json())
+    .then(response => {
+      console.log(response)
+    })
   };
 
 
@@ -73,23 +104,51 @@ function App() {
     <>
       <header className="header">
         <h1>Mascotas memorables</h1>
-        <div>
-        <p>Registrarse</p>
-          <form id="signup-form" className="form" onInput={handleInput}>
-            <label htmlFor="name">Nombre:</label><input type="text" name="name" id="name" />
-            <label htmlFor="address">Dirección:</label><input type="text" name="address" id="address" />
-            <label htmlFor="email">Correo electrónico:</label><input type="text" name="email" id="email" />
-            <label htmlFor="password">Contraseña:</label><input type="password" name="password" id="password" />
-            <button onClick={handleSignUp}>Iniciar sesión</button>
-          </form>
+        <div className={`login-signup-container ${isLogged ? "hidden" : ""}`}>
+          <div>
+          <p>Registrarse</p>
+            <form id="signup-form" className="form" onInput={handleInput}>
+              <label htmlFor="name">Nombre:</label><input type="text" name="name" id="name" />
+              <label htmlFor="address">Dirección:</label><input type="text" name="address" id="address" />
+              <label htmlFor="email">Correo electrónico:</label><input type="text" name="email" id="email" />
+              <label htmlFor="password">Contraseña:</label><input type="password" name="password" id="password" />
+              <button onClick={handleSignUp}>Iniciar sesión</button>
+            </form>
+          </div>
+          <div>
+          <p>Iniciar sesión</p>
+            <form id="login-form" className="form" onInput={handleInput}>
+              <label htmlFor="email">Correo electrónico:</label><input type="text" name="email" id="email" />
+              <label htmlFor="password">Contraseña:</label><input type="password" name="password" id="password" />
+              <button onClick={handleLogin}>Iniciar sesión</button>
+            </form>
+          </div>
         </div>
-        <div>
-        <p>Iniciar sesión</p>
-          <form id="login-form" className="form" onInput={handleInput}>
-            <label htmlFor="email">Correo electrónico:</label><input type="text" name="email" id="email" />
-            <label htmlFor="password">Contraseña:</label><input type="password" name="password" id="password" />
-            <button onClick={handleLogin}>Iniciar sesión</button>
+        <div className={`add-pet-form ${!isLogged ? "hidden" : ""}`}>
+          <form id="new-pet" onInput={handleInput} className="add-new-pet">
+            <div>
+              <label htmlFor="name">Nombre:
+              </label>
+              <label htmlFor="species">Especie: 
+              </label>
+              <label htmlFor="descr">Comentario:
+              </label>
+              <label htmlFor="sex">Sexo: 
+              </label> 
+            </div>
+            <div>
+              <input type="text" name="name" id="name" />
+              <input type="text" name="species" id="species" />
+              <input type="text" name="descr" id="descr" />
+              <select name="sex" id="sex">
+                <option value="h">Hembra</option>
+                <option value="m">Macho</option>
+              </select>
+              
+            </div>
+            
           </form>
+          <button onClick={handleAddPet}>Añadir mascota</button>
         </div>
       </header>
       <main>
