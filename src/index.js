@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2/promise");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 require("dotenv").config();
 
@@ -127,5 +129,91 @@ app.delete("/pets/:id", async (req, res) => {
     } else {
         res.status(200).json({success: false, message: "No existe una mascota con ese id"})
     }
-
 })
+
+// post (registrarse)
+app.post("/signup", async (req, res) => {
+    const conn = await getConnection();
+    const {name, email, address, password} = req.body;
+
+    //comprobar que no está en la bd
+    const selectEmail = "SELECT * FROM users WHERE email = ?"
+    const [emailResult] = await conn.query(selectEmail, [email]);
+    
+    if (emailResult.length === 0) {
+        // el usuario no existe
+        const hasshedPassword = await bcrypt.hash(password, 10);
+        const insertUser = "INSERT INTO users (name, email, address, password) values (?, ?, ?, ?);";
+        const [newUser] = await conn.query(insertUser, [
+            name, 
+            email, 
+            address, 
+            hasshedPassword])
+        res.status(201).json({success: true, id: newUser.insertId});
+    } else {
+        // el usuario existe
+        res.status(200).json({success: false, message: "El usuario ya existe"});
+    }
+
+    await conn.end()
+});
+
+// post (login)
+app.post("/login", async (req, res) => {
+    const conn = await getConnection();
+    const {email, password} = req.body;
+
+    //comprobar que no está en la bd
+    const selectEmail = "SELECT * FROM users WHERE email = ?"
+    const [emailResult] = await conn.query(selectEmail, [email]);
+
+    if (emailResult.length !== 0) {
+        // comprobar que la contraseña encriptada coincide
+        const samePassword = await bcrypt.compare(password, emailResult[0].password);
+
+        if (samePassword) {
+            // si la contraseña coincide
+            const tokenInfo = {email: emailResult[0].email, id: emailResult[0].id};
+            const token = jwt.sign(tokenInfo, process.env.SECRET, {expiresIn: "1h"});
+            res.status(201).json({success: true, token: token});
+        } else {
+            // si no coincide
+            res.status(400).json({success: false, message: "La contraseña es incorrecta"});
+        }
+    } else {
+        res.status(400).json({success: false, message: "El email es incorrecto"});
+    }
+
+    conn.end()
+})
+
+// ruta protegida
+
+const authorize = (req, res, next) => {
+    const tokenString = req.headers.authorization;
+
+    if(!tokenString) {
+        res.status(400).json({successs: false, message: "Debes iniciar sesión"})
+    } else {
+        try {
+            const token = tokenString.split(" ")[1];
+            const verifiedToken = jwt.verify(token, process.env.SECRET);
+             req.userInfo = verifiedToken;
+        } catch (error) {
+            res.status(400).json({success: false, message: error})
+        }
+    }
+    
+    next();
+};
+
+app.get("/myPets", authorize, async (req, res) => {
+    try {
+        const conn = await getConnection();
+        const select = "SELECT * FROM userpets"
+        const [results] = await conn.query(select);
+        res.status(200).json({success: true, data: results})
+    } catch (error) {
+        res.status(400).json({success: false, message: error});
+    }
+});

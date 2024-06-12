@@ -23,3 +23,21 @@ INSERT INTO `memorablepets`.`pets` (`name`, `species`, `sex`, `descr`) VALUES ('
 INSERT INTO `memorablepets`.`pets` (`name`, `species`, `sex`, `descr`) VALUES ('Estrella', 'perro', 'h', 'Era más lista que el hambre.');
 INSERT INTO `memorablepets`.`pets` (`name`, `species`, `sex`, `descr`) VALUES ('Huevo pelao', 'perro', 'm', 'No sabemos su nombre real.');
 INSERT INTO `memorablepets`.`pets` (`name`, `species`, `sex`, `descr`) VALUES ('Mosqui', 'mosca', 'm', 'Cualquier mosca puede ser mosqui.');
+
+CREATE TABLE users (
+	idUser int auto_increment primary key not null,
+    name VARCHAR(45) not null,
+    email VARCHAR(45) not null unique,
+    address VARCHAR(45) not null,
+    password VARCHAR(255) not null
+);
+
+CREATE TABLE userpets (
+	id int auto_increment primary key not null,
+    name VARCHAR(45) not null,
+    species VARCHAR(45) not null,
+    sex VARCHAR(45) not null,
+    descr VARCHAR(255) not null
+);
+
+INSERT INTO `memorablepets`.`userpets` (`id`, `name`, `species`, `sex`, `descr`) VALUES ('', 'Gou', 'zorro', 'm', 'Un zorrito rosa muy lindo y hermoso');
