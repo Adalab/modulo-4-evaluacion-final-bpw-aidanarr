@@ -188,7 +188,6 @@ app.post("/login", async (req, res) => {
 })
 
 // ruta protegida
-
 const authorize = (req, res, next) => {
     const tokenString = req.headers.authorization;
 
