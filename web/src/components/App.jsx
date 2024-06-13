@@ -138,7 +138,7 @@ function App() {
       <header className="header">
         <h1>Mascotas memorables</h1>
         <div className={`login-signup-container ${isLogged ? "hidden" : ""}`}>
-          <div>
+          <div className="loginbox">
           <p>Registrarse</p>
             <form id="signup-form" className="form" onInput={handleInput}>
               <label htmlFor="name">Nombre:</label><input type="text" name="name" id="name" />
@@ -148,7 +148,7 @@ function App() {
               <button onClick={handleSignUp}>Iniciar sesión</button>
             </form>
           </div>
-          <div>
+          <div className="loginbox">
           <p>Iniciar sesión</p>
             <form id="login-form" className="form" onInput={handleInput}>
               <label htmlFor="email">Correo electrónico:</label><input type="text" name="email" id="email" />

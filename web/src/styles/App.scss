@@ -129,3 +129,18 @@
    input {
       color: palevioletred;
    }
+
+   .loginbox {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+
+      button {
+         margin-top: 20px;
+      }
+
+      p {
+         color: palevioletred;
+         font-weight: bold;
+      }
+   }
