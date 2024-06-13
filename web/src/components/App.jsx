@@ -5,6 +5,7 @@ import PetCard from "./PetCard";
 function App() {
 
   const [petList, setPetList] = useState([]);
+  const [userPetList, setUserPetList] = useState([]);
   const [loginData, setLoginData] = useState({email: "", password: ""})
   const [signupData, setSignupData] = useState({
     name: "", 
@@ -16,11 +17,13 @@ function App() {
     species: "", 
     sex: "", 
     descr: ""})
+  const [reloadList, setReloadList] = useState(false)
   
   const [token, setToken] = useState("");
 
   const [isLogged, setIsLogged] = useState(false);
 
+  // carga la lista de mascotas genérica
   useEffect(() => {
     fetch(`http://localhost:5001/pets`)
     .then((response) => response.json())
@@ -29,6 +32,23 @@ function App() {
     })
   }, []);
 
+  // carga la lista de mascotas del usuario al iniciar sesión o al añadir una nueva
+  useEffect(() => {
+    if (isLogged) {
+      fetch(`http://localhost:5001/myPets`,  {
+        method: "GET",
+        headers: {
+          authorization: token
+        }
+      })
+      .then((response) => response.json())
+      .then(info => {
+        setUserPetList(info.data);
+      })
+    }
+  }, [isLogged, reloadList])
+
+  // actualizar datos del form
   const handleInput = (ev) => {
     const value = ev.target.value;
     const id = ev.target.id;
@@ -45,6 +65,7 @@ function App() {
     
   }
 
+  // fetch para iniciar sesión
   const handleLogin = (ev) => {
     ev.preventDefault()
 
@@ -65,6 +86,7 @@ function App() {
 
   };
 
+  // fetch para registrarse
   const handleSignUp = (ev) => {
     ev.preventDefault()
 
@@ -82,10 +104,11 @@ function App() {
     })
   };
 
+  // fetch para añadir una nueva tarjeta (lista del usuario)
   const handleAddPet = (ev) => {
-    ev.preventDefault()
+    ev.preventDefault();
 
-    fetch(`http://localhost:5001/addPet`, {
+    fetch(`http://localhost:5001/myPets/add`, {
       method: "POST",
       body: JSON.stringify(newPetData),
       headers: {
@@ -96,9 +119,19 @@ function App() {
     .then((response) => response.json())
     .then(response => {
       console.log(response)
+      setReloadList(!reloadList)
     })
+    
   };
 
+  // renderiza la lista genérica o la del usuario dependiendo de si ha hecho login
+  const renderList = () => {
+  if (!isLogged) {
+    return petList.map((pet, i) => <PetCard key={i} reloadList={reloadList} setReloadList={setReloadList} isLogged={isLogged} pet={pet} />)
+  } else {
+    return userPetList.map((pet, i) => <PetCard key={i} reloadList={reloadList} setReloadList={setReloadList} pet={pet} isLogged={isLogged} />)
+  }
+  }
 
   return (
     <>
@@ -120,8 +153,9 @@ function App() {
             <form id="login-form" className="form" onInput={handleInput}>
               <label htmlFor="email">Correo electrónico:</label><input type="text" name="email" id="email" />
               <label htmlFor="password">Contraseña:</label><input type="password" name="password" id="password" />
-              <button onClick={handleLogin}>Iniciar sesión</button>
+              
             </form>
+            <button onClick={handleLogin}>Iniciar sesión</button>
           </div>
         </div>
         <div className={`add-pet-form ${!isLogged ? "hidden" : ""}`}>
@@ -144,7 +178,6 @@ function App() {
                 <option value="h">Hembra</option>
                 <option value="m">Macho</option>
               </select>
-              
             </div>
             
           </form>
@@ -153,7 +186,7 @@ function App() {
       </header>
       <main>
         <div className="pets-container">
-          {petList.map((pet, i) => <PetCard key={i} pet={pet} />)}
+          {renderList()}
         </div>
       </main>
     </>

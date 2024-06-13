@@ -1,10 +1,16 @@
  * {
     margin: 0;
     padding: 0;
+    font-family:Arial, Helvetica, sans-serif;
+    letter-spacing: 1px;
+ }
+
+ body {
+   background-color: rgb(247, 242, 244);
  }
 
  .pet-card {
-   background-color: antiquewhite;
+   background-color: white;
    margin: 10px;
    padding: 30px;
    padding-left: 10%;
@@ -13,13 +19,37 @@
    flex-direction: column;
    justify-content: center;
    align-items: left;
+   border-radius: 10px;
+   box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.092);
+   transition: margin 0.5s;
    &:last-child {
       order: -1;
+      &::before {
+         content: "¡Nuevo!";
+         color: palevioletred;
+         font-size: 12px;
+         margin-bottom: 10px;
+      }
    }
+   &:hover{
+      margin-left: 5px;
+      margin-right: 5px;
+   }
+
+   &_data {
+      display: flex;
+      justify-content: left;
+      gap: 15px;
+   }
+ }
+
+ .fieldnames {
+   text-align: right;
  }
 
  h1 {
    flex-grow: 3;
+   color: palevioletred;
  }
 
  .header {
@@ -41,6 +71,13 @@
    .form {
       display: flex;
       flex-direction: column;
+   }
+
+   .add-pet-form {
+      display: flex;
+      gap: 20px;
+      flex-direction: column;
+    
    }
 
    .pets-container {
@@ -66,4 +103,29 @@
          justify-content: center;
          gap: 10px;
       }
+   }
+
+   .card-btn-box {
+      display: flex;
+      gap: 20px;
+      justify-content: right;
+      margin-top: 20px;
+   }
+
+   button {
+      border: 2px solid palevioletred;
+      padding: 5px;
+      padding-left: 10px;
+      padding-right: 10px;
+      color: palevioletred;
+      background-color: transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      &:hover {
+         background-color: rgb(250, 215, 229);
+      }
+   }
+
+   input {
+      color: palevioletred;
    }
