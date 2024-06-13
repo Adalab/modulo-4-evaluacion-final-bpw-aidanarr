@@ -7,6 +7,6 @@ Estos son los endpoins disponibles:
 
 - **/pets**: obtiene toda la lista de mascotas actualmente disponibles en la base de datos.
 
-- **/pets/id**: obtiene los datos de un registro en concreto.
+- **/pets/id**: obtiene los datos de un registro en concreto. Puedes borrar registros con el método DELETE y modificarlos con el método PUT.
 
 - **/addPet**: añade un registro a la base de datos general.
