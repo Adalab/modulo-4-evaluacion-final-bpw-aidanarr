@@ -284,3 +284,7 @@ app.delete("/myPets/:id", async (req, res) => {
         res.status(200).json({success: false, message: "No existe una mascota con ese id"})
     }
 })
+
+// rutas estáticas
+const staticUrl = "./src/public";
+app.use(express.static(staticUrl));
